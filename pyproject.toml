@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "authentipic"
+version = "0.1.0"
+description = "AI-generated image detection system"
+authors = ["Kotrina Keichline <settheemaillater@gmail.com>"]
+readme = "README.md"
+packages = [{include = "authentipic", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
