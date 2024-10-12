@@ -1,0 +1,13 @@
+data:
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  architecture: "resnet50"
+  pretrained: true
+
+training:
+  batch_size: 32
+  epochs: 50
+  learning_rate: 0.001
