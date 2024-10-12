@@ -1,0 +1,2 @@
+# authentipic
+AI Image Detection
