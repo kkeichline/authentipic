@@ -1,8 +1,7 @@
-# src/authentipic/data/dataset_factory.py
-
-from typing import Dict, Any
+from typing import Dict, Any, List
 from authentipic.data.faceforensics_dataset import FaceForensicsDataset
 from authentipic.data.dfdc_dataset import DFDCDataset
+
 
 class DatasetFactory:
     @staticmethod
@@ -15,11 +14,20 @@ class DatasetFactory:
             raise ValueError(f"Unknown dataset: {dataset_name}")
 
     @staticmethod
-    def get_combined_dataset(dataset_configs: Dict[str, Dict[str, Any]], transform: Any = None) -> Any:
+    def get_combined_dataset(
+        dataset_configs: Dict[str, Dict[str, Any]],
+        transform: Any = None,
+        exclude: List[str] = None,
+    ) -> Any:
+        if exclude is None:
+            exclude = []
+
         datasets = []
         for dataset_name, config in dataset_configs.items():
-            config['transform'] = transform
-            datasets.append(DatasetFactory.get_dataset(dataset_name, **config))
-        
+            if dataset_name not in exclude:
+                config["transform"] = transform
+                datasets.append(DatasetFactory.get_dataset(dataset_name, **config))
+
         from torch.utils.data import ConcatDataset
+
         return ConcatDataset(datasets)

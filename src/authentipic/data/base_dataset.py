@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import Dataset
 from typing import Tuple, Any
 
+
 class BaseDataset(Dataset, ABC):
     @abstractmethod
     def __init__(self, root_dir: str, transform: Any = None):
