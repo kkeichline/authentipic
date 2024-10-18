@@ -12,7 +12,6 @@ test:
 
 # Run linter
 lint:
-	# poetry run ruff src/authentipic
 	poetry run ruff check src/authentipic
 
 # Format code

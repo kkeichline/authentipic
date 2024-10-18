@@ -1,49 +1,82 @@
-# config.yaml
-
 # Data Configuration
 data:
   data_dir: "./data"
   faceforensics_dir: "./data/faceforensics"
   dfdc_dir: "./data/deepfake-detection-challenge"
+  exclude_datasets: ["faceforensics"]  # e.g., ["dfdc"] to exclude DFDC dataset
   train_split: 0.8
   val_split: 0.1
   test_split: 0.1
 
 # Model Configuration
 model:
-  model_path: "./models/authentipic_model.pth"
   architecture: "resnet50"  # Options: resnet50, efficientnet_b0, vit_base_patch16_224
+  pretrained: true
+  num_classes: 2
 
 # Training Configuration
 training:
   batch_size: 32
   learning_rate: 0.001
   num_epochs: 50
-  optimizer: "adam"  # Options: adam, sgd
-  scheduler: "cosine"  # Options: cosine, step, exponential
-  early_stopping_patience: 10
+  checkpoint_dir: "./checkpoints"
+  resume_from: null  # Set to checkpoint path if resuming training
+  save_frequency: 5  # Save checkpoint every N epochs
+  scheduler:
+    type: "step"  # Options: step, exponential, cosine, plateau
+    params:
+      step_size: 10
+      gamma: 0.1
+  early_stopping:
+    patience: 10
+    min_delta: 0.001
+    mode: "min"  # Options: min, max
 
 # Data Augmentation
 augmentation:
-  random_crop_size: 224
-  horizontal_flip_prob: 0.5
-  brightness_contrast_prob: 0.2
+  train:
+    random_crop_size: 224
+    horizontal_flip_prob: 0.5
+    brightness_contrast_prob: 0.2
+  val:
+    crop_size: 224
 
 # Inference Configuration
 inference:
-  threshold: 0.5
+  best_model_path: "./checkpoints/best_model.pth"
   batch_size: 64
+  threshold: 0.5
+
+# Evaluation
+evaluation:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1
+    - auc_roc
+    - average_precision
+  save_plots: true
+  output_dir: "./results/evaluation"
 
 # Hardware Configuration
 hardware:
-  device: "mps"  # Options: cuda, cpu, mps
+  device: "mps"  # Options: mps, cpu
   num_workers: 4
+  pin_memory: true
+  use_mixed_precision: true
 
-# Logging and Checkpoints
+# Mac M2 Specific Optimizations
+mac_m2:
+  use_mps_if_available: true
+  fallback_to_cpu: true  # Fallback to CPU for operations not supported by MPS
+  enable_memory_efficient_attention: true  # For transformer-based models, if applicable
+
+
+# Logging
 logging:
-  log_dir: "./logs"
-  tensorboard_dir: "./runs"
-  save_frequency: 5  # Save model every 5 epochs
+  level: "INFO"
+  log_file: "./logs/authentipic.log"
 
 # Experiment Tracking
 experiment:
@@ -51,5 +84,5 @@ experiment:
   tags: ["deepfake", "detection", "faceforensics", "dfdc"]
 
 # General
-mode: "train"  # Options: train, infer
 seed: 42
+mode: "train"  # Options: train, infer
