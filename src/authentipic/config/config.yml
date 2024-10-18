@@ -1,0 +1,55 @@
+# config.yaml
+
+# Data Configuration
+data:
+  data_dir: "./data"
+  faceforensics_dir: "./data/faceforensics"
+  dfdc_dir: "./data/deepfake-detection-challenge"
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+# Model Configuration
+model:
+  model_path: "./models/authentipic_model.pth"
+  architecture: "resnet50"  # Options: resnet50, efficientnet_b0, vit_base_patch16_224
+
+# Training Configuration
+training:
+  batch_size: 32
+  learning_rate: 0.001
+  num_epochs: 50
+  optimizer: "adam"  # Options: adam, sgd
+  scheduler: "cosine"  # Options: cosine, step, exponential
+  early_stopping_patience: 10
+
+# Data Augmentation
+augmentation:
+  random_crop_size: 224
+  horizontal_flip_prob: 0.5
+  brightness_contrast_prob: 0.2
+
+# Inference Configuration
+inference:
+  threshold: 0.5
+  batch_size: 64
+
+# Hardware Configuration
+hardware:
+  device: "mps"  # Options: cuda, cpu, mps
+  num_workers: 4
+
+# Logging and Checkpoints
+logging:
+  log_dir: "./logs"
+  tensorboard_dir: "./runs"
+  save_frequency: 5  # Save model every 5 epochs
+
+# Experiment Tracking
+experiment:
+  name: "authentipic_v1"
+  tags: ["deepfake", "detection", "faceforensics", "dfdc"]
+
+# General
+mode: "train"  # Options: train, infer
+seed: 42
