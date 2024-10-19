@@ -1,9 +1,8 @@
-# src/authentipic/models/model_factory.py
-
 import torch
 import torch.nn as nn
 from torchvision import models
 from typing import Dict, Any
+from authentipic.config import ModelConfig
 
 
 class BaseModel(nn.Module):
@@ -48,10 +47,10 @@ class EfficientNetModel(BaseModel):
 
 class ModelFactory:
     @staticmethod
-    def get_model(config: Dict[str, Any]) -> nn.Module:
-        architecture = config["model"]["architecture"]
-        num_classes = config["model"]["num_classes"]
-        pretrained = config["model"]["pretrained"]
+    def get_model(config: ModelConfig) -> nn.Module: 
+        architecture = config.architecture
+        num_classes = config.num_classes
+        pretrained = config.pretrained
 
         if architecture == "resnet50":
             return ResNetModel(num_classes, pretrained)

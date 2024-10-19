@@ -1,23 +1,27 @@
 import argparse
+import logging
 import torch
 import torch.nn as nn
-from authentipic.data.downloader import DataDownloader
+
+# from authentipic.data.downloader import DataDownloader
 from authentipic.data.dataset_factory import DatasetFactory
 from authentipic.models.model_factory import create_model
 from authentipic.training.trainer import Trainer
 from authentipic.inference.predictor import Predictor
-from authentipic.config.config import load_config
+from authentipic.config import config
 from torch.utils.data import DataLoader, random_split
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
+logger = logging.getLogger(__name__)
 
-def get_device(config):
-    if config.mac_m2.use_mps_if_available and torch.backends.mps.is_available():
-        device = torch.device("mps")
-    else:
-        device = torch.device("cpu")
-    return device
+
+def get_device():
+    if config.hardware.device == "mps" and torch.backends.mps.is_available():
+        logger.info("Using MPS device.")
+        return torch.device("mps")
+    logger.info("Using CPU device.")
+    return torch.device("cpu")
 
 
 def get_transform(train=True):
@@ -42,80 +46,99 @@ def get_transform(train=True):
         )
 
 
-def download_data(config):
-    downloader = DataDownloader(config.data_dir)
-    downloader.download_all()
+# def download_data(config):
+#    logger.info("Downloading data...")
+#     downloader = DataDownloader(config.data_dir)
+#     downloader.download_all()
 
 
-def train(config):
-    # Download data if not already present
-    download_data(config)
+def train():
+    # download_data(config)
+
+    device = get_device()
 
     # Create datasets
     dataset_configs = {
-        "faceforensics": {"root_dir": config.faceforensics_dir},
-        "dfdc": {"root_dir": config.dfdc_dir},
+        "faceforensics": {"root_dir": config.data.faceforensics_dir},
+        "dfdc": {"root_dir": config.data.dfdc_dir},
     }
 
     full_dataset = DatasetFactory.get_combined_dataset(
         dataset_configs,
         transform=get_transform(train=True),
-        exclude=config.exclude_datasets,
+        exclude=config.data.exclude_datasets,
     )
 
     # Split dataset
-    train_size = int(0.8 * len(full_dataset))
-    val_size = int(0.1 * len(full_dataset))
+    train_size = int(config.data.train_split * len(full_dataset))
+    val_size = int(config.data.val_split * len(full_dataset))
     test_size = len(full_dataset) - train_size - val_size
     train_dataset, val_dataset, test_dataset = random_split(
         full_dataset, [train_size, val_size, test_size]
     )
 
     train_loader = DataLoader(
-        train_dataset, batch_size=config.batch_size, shuffle=True, num_workers=4
+        train_dataset,
+        batch_size=config.training.batch_size,
+        shuffle=True,
+        num_workers=config.hardware.num_workers,
     )
-    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, num_workers=4)
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=config.training.batch_size,
+        num_workers=config.hardware.num_workers,
+    )
 
-    # Create model, optimizer, and loss function
-    model = create_model()
-
-    device = get_device(config)
+    # Create model
+    model = create_model(config.model)
     model = model.to(device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
+    # Create optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.training.learning_rate)
+
+    # Create loss function
     criterion = nn.CrossEntropyLoss()
 
     # Create scheduler and early stopping
     scheduler = Trainer.create_scheduler(
-        config.scheduler_type, optimizer, **config.scheduler_params
+        config.training.scheduler_type, optimizer, **config.training.scheduler_params
     )
-    early_stopping = Trainer.create_early_stopping(**config.early_stopping_params)
+    early_stopping = Trainer.create_early_stopping(
+        patience=config.training.early_stopping_patience,
+        min_delta=config.training.early_stopping_delta,
+    )
 
     # Initialize trainer
     trainer = Trainer(
         model,
         optimizer,
         criterion,
-        config.device,
+        device,
         scheduler=scheduler,
         early_stopping=early_stopping,
-        checkpoint_dir=config.checkpoint_dir,
+        checkpoint_dir=config.training.checkpoint_dir,
     )
 
     # Start training
     trainer.fit(
-        train_loader, val_loader, config.num_epochs, resume_from=config.resume_from
+        train_loader,
+        val_loader,
+        config.training.num_epochs,
+        resume_from=config.training.resume_from,
     )
 
 
 def infer(config):
     # Load model for inference
-    model = create_model()
-    checkpoint = torch.load(config.best_model_path)
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model.to(config.device)
+    device = get_device()
 
-    predictor = Predictor(model, config.device)
+    # Create and load model
+    model = create_model(config.model)
+    checkpoint = torch.load(config.inference.best_model_path, map_location=device)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model = model.to(device)
+
+    predictor = Predictor(model, device)
 
     # Create test dataset
     dataset_configs = {
@@ -151,23 +174,12 @@ def infer(config):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AuthentiPic: Deepfake Detection")
-    parser.add_argument(
-        "--config", type=str, default="config.yaml", help="Path to config file"
-    )
-    parser.add_argument(
-        "--mode",
-        type=str,
-        choices=["train", "infer"],
-        required=True,
-        help="Mode of operation",
-    )
+    parser.add_argument("--mode", type=str, choices=["train", "infer"], required=True, help="Mode of operation")
     args = parser.parse_args()
-
-    config = load_config(args.config)
-
+    
     if args.mode == "train":
-        train(config)
+        train()
     elif args.mode == "infer":
-        infer(config)
+        infer()
     else:
         print("Invalid mode. Use 'train' or 'infer'.")
