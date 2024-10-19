@@ -1,0 +1,4 @@
+faceforensics:
+  data_dir: /path/to/faceforensics
+  data_source: "faceforensics"
+  data_source_link: "
