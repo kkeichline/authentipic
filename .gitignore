@@ -162,6 +162,7 @@ cython_debug/
 #.idea/
 
 # Ignore local raw and processed data
-/data/
-/checkpoints/
-/models/
+*/data/
+*/data
+*/checkpoints/
+*/models/
