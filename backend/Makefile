@@ -36,3 +36,19 @@ clean:
 
 # Run all quality checks
 quality-check: lint test
+
+# update packages with poetry
+update:
+	poetry update
+
+# Run annotation web app
+run-annotation-app:
+    poetry run python src/authentipic/annotation/app.py
+
+# Export annotations to CSV
+export-annotations:
+    poetry run python -m authentipic.annotation.manager --export
+
+# Generate training dataset from annotations
+generate-annotation-dataset:
+    poetry run python -m authentipic.annotation.manager --generate-dataset data/processed/annotation_dataset.csv
