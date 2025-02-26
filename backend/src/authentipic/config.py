@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from typing import List
-import os
 
 
 @dataclass
@@ -29,7 +28,9 @@ class TrainingConfig:
     checkpoint_dir: str = "./checkpoints"
     resume_from: str = None
     scheduler_type: str = "step"
-    scheduler_params: dict = field(default_factory=lambda: {"step_size": 10, "gamma": 0.1})
+    scheduler_params: dict = field(
+        default_factory=lambda: {"step_size": 10, "gamma": 0.1}
+    )
     early_stopping_patience: int = 10
     early_stopping_delta: float = 0.001
 
@@ -56,6 +57,6 @@ class Config:
     training: TrainingConfig = field(default_factory=TrainingConfig)
     inference: InferenceConfig = field(default_factory=InferenceConfig)
     hardware: HardwareConfig = field(default_factory=HardwareConfig)
-    
+
 
 config = Config()

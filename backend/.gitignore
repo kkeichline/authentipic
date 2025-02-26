@@ -32,8 +32,9 @@ ENV/
 trained_models/
 
 # Data
-data/
-data/*
+data/external/
+data/processed/
+data/raw/
 datasets/
 *.csv
 *.json
