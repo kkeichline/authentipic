@@ -51,12 +51,35 @@ class HardwareConfig:
 
 
 @dataclass
+class AnnotationConfig:
+    annotation_dir: str = "data/annotations"
+    image_dir: str = "data/raw"
+    output_dir: str = "data/processed/annotations"
+    annotation_schema: dict = field(
+        default_factory=lambda: {
+            "labels": {
+                "real": "Authentic image with minimal editing",
+                "ai_generated": "AI-generated image",
+                "manipulated": "Significantly manipulated image",
+            },
+            "confidence_levels": [1, 2, 3, 4, 5],
+            "metadata_fields": [
+                "annotator_id",
+                "annotation_timestamp",
+                "annotation_duration_sec",
+            ],
+        }
+    )
+
+
+@dataclass
 class Config:
     data: DataConfig = field(default_factory=DataConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     training: TrainingConfig = field(default_factory=TrainingConfig)
     inference: InferenceConfig = field(default_factory=InferenceConfig)
     hardware: HardwareConfig = field(default_factory=HardwareConfig)
+    annotation: AnnotationConfig = field(default_factory=AnnotationConfig)
 
 
 config = Config()
