@@ -1,17 +1,19 @@
 from typing import Dict, Any, List
+from torch.utils.data import ConcatDataset
 from authentipic.data.faceforensics_dataset import FaceForensicsDataset
 from authentipic.data.dfdc_dataset import DFDCDataset
 
 
 class DatasetFactory:
+    DATASET_REGISTRY = {
+		"faceforensics": FaceForensicsDataset,
+		"dfdc": DFDCDataset,
+	}
     @staticmethod
     def get_dataset(dataset_name: str, **kwargs: Any) -> Any:
-        if dataset_name == "faceforensics":
-            return FaceForensicsDataset(**kwargs)
-        elif dataset_name == "dfdc":
-            return DFDCDataset(**kwargs)
-        else:
-            raise ValueError(f"Unknown dataset: {dataset_name}")
+        if dataset_name not in DatasetFactory.DATASET_REGISTRY:
+              raise ValueError(f"Dataset {dataset_name} not supported")
+        return DatasetFactory.DATASET_REGISTRY[dataset_name](**kwargs)
 
     @staticmethod
     def get_combined_dataset(
@@ -27,7 +29,5 @@ class DatasetFactory:
             if dataset_name not in exclude:
                 config["transform"] = transform
                 datasets.append(DatasetFactory.get_dataset(dataset_name, **config))
-
-        from torch.utils.data import ConcatDataset
 
         return ConcatDataset(datasets)

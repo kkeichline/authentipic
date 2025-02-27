@@ -2,7 +2,7 @@
 name = "authentipic"
 version = "0.1.0"
 description = "AI-generated image detection system"
-authors = ["Kotrina Keichline <settheemaillater@gmail.com>"]
+authors = ["Kotrina Keichline <authentipic@proton.me>"]
 readme = "README.md"
 packages = [{include = "authentipic", from = "src"}]
 
@@ -19,12 +19,14 @@ scikit-learn = "^1.5.2"
 pandas = "^2.2.3"
 matplotlib = "^3.9.2"
 seaborn = "^0.13.2"
-tensorboard = "^2.18.0"
 kaggle = "^1.6.17"
 pytest = "^8.3.3"
 onnx = "^1.17.0"
 onnx-tf = "^1.10.0"
 flask = "^3.1.0"
+fastapi = "^0.115.8"
+uvicorn = "^0.34.0"
+tensorboard = "^2.19.0"
 
 
 [tool.poetry.group.dev.dependencies]
