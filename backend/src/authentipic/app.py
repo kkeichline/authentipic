@@ -211,8 +211,9 @@ async def analyze_image_base64(image_data: Dict[str, str]):
     except Exception as e:
         logger.error(f"Error processing image: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing image: {str(e)}")
-    
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("authentipic.api:app", host="0.0.0.0", port=8000, reload=True)
