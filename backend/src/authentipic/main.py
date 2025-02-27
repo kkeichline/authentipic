@@ -174,9 +174,15 @@ def infer(config):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AuthentiPic: Deepfake Detection")
-    parser.add_argument("--mode", type=str, choices=["train", "infer"], required=True, help="Mode of operation")
+    parser.add_argument(
+        "--mode",
+        type=str,
+        choices=["train", "infer"],
+        required=True,
+        help="Mode of operation",
+    )
     args = parser.parse_args()
-    
+
     if args.mode == "train":
         train()
     elif args.mode == "infer":

@@ -52,3 +52,19 @@ export-annotations:
 # Generate training dataset from annotations
 generate-annotation-dataset:
     poetry run python -m authentipic.annotation.manager --generate-dataset data/processed/annotation_dataset.csv
+
+# Run the API server
+run-api:
+    poetry run python src/authentipic/run_api.py
+
+# Run the API server in development mode with auto-reload
+run-api-dev:
+    poetry run python src/authentipic/run_api.py --reload
+
+# Convert model for browser/app
+convert-tfjs:
+    poetry run python scripts/convert_model.py --format tfjs --output-dir ./public/models
+
+# Convert model to ONNX
+convert-onnx:
+    poetry run python scripts/convert_model.py --format onnx --output-dir ./exported_models
